@@ -6,51 +6,63 @@
 class SharepointService {
     constructor() {
         // this.client = new aws.SecretsManager();
-        // this.axios = require('axios');
-        // this.getRequestDigest = null;
         // this.data = this.client.getSecretValue({ SecretId: '<secret number>' }).promise(); // secret number
+        // this.secret = JSON.parse(this.data.SecretString);
+        this.axios = require('axios');
+        // this.getRequestDigest = null;
     }
 
     getToken() {
-        const secret = JSON.parse(this.data.SecretString);
-        return axios.post('https://accounts.accesscontrol.windows.net/<sharepoint resource id>/tokens/OAuth/2', // sharepoint resource id
+        axios.post('https://accounts.accesscontrol.windows.net/<sharepoint resource id>/tokens/OAuth/2', // sharepoint resource id
             querystring.stringify({
                 grant_type: '<client_credentials>', // client credentials
                 client_id: '<client_id>', // client ID
-                client_secret: secret,
+                client_secret: this.secret,
                 resource: '<ask your sharepoint person>' // sharepoint person
             }), {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             }
-        )
+        ).then( accessToken => {
+            axios.post('https://telefonicacorp-my.sharepoint.com/my/_api/contextinfo', {}, {
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`,
+    
+                }
+            }).then( result => {
+                this.getRequestDigest = result.data.FormDigestValue
+            }).catch( (error) => {
+                return error;
+            });
+        }).catch( (error) => {
+            return error;
+        });
     }
 
     async createFolder(folderName) {
         try {
             const urlSP = `https://telefonicacorp-my.sharepoint.com/my/_api/web/GetFolderByServerRelativeUrl('Documents')/AddFolder(url='${folderName}', overwrite=true)`;
             
-            this.getToken().then( accessToken => {
-                this.getRequestDigest = axios.post('https://telefonicacorp-my.sharepoint.com/my/_api/contextinfo', {}, {
+            this.getToken().then( () => {
+                axios.post(urlSP, file, {
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
                     headers: {
-                        "Authorization": `Bearer ${accessToken}`,
-        
-                    }
-                })
-            });
-            
-            await axios.post(urlSP, file, {
-                maxBodyLength: Infinity,
-                maxContentLength: Infinity,
-                headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'X-RequestDigest': this.getRequestDigest.data.FormDigestValue
+                            'Authorization': `Bearer ${token}`, //  ¿TOKEN?
+                            'X-RequestDigest': this.getRequestDigest
                         }
                     }
-                )
-        } catch (e) {
-            return e;
+                ).then( () => {
+                    return 'La carpeta se ha creado correctamente.';
+                }).catch( (error) => {
+                    return error;
+                });
+            }).catch( (error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
         }
     }
 
@@ -58,32 +70,26 @@ class SharepointService {
         try {
             const urlSP = `https://telefonicacorp-my.sharepoint.com/my/_api/web/GetFolderByServerRelativeUrl('Documents')/${folderName}/Add(url='${file.name}', overwrite=true)`;
             
-            this.getToken().then( accessToken => {
-                this.getRequestDigest = axios.post('https://telefonicacorp-my.sharepoint.com/my/_api/contextinfo', {}, {
+            this.getToken().then( () => {
+                axios.post(urlSP, file, {
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
                     headers: {
-                        "Authorization": `Bearer ${accessToken}`,
-        
-                    }
-                })
-            });
-            
-            await axios.post(urlSP, file, {
-                maxBodyLength: Infinity,
-                maxContentLength: Infinity,
-                headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'X-RequestDigest': this.getRequestDigest.data.FormDigestValue
+                            'Authorization': `Bearer ${token}`, //  ¿TOKEN?
+                            'X-RequestDigest': this.getRequestDigest
                         }
                     }
-                )
-            return  'Fichero cargado correctamente.';
-        } catch (e) {
-            return e;
+                ).then( () => {
+                    return 'El archivo se ha subido correctamente.';
+                }).catch( (error) => {
+                    return error;
+                });
+            }).catch( (error) => {
+                return error;
+            });
+        } catch (error) {
+            return error;
         }
-    }
-
-    getUsers () {
-        return this.axios.get('https://jsonplaceholder.typicode.com/users')
     }
 }
 
