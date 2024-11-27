@@ -45,7 +45,7 @@ class Server {
                 const { name:folderName } = req.params;
 
                 // invocacion servicio para subir archivo a sharepoint
-                // this.sharepointService.createFolder(folderName, this.router)
+                // this.sharepointService.createFolder(folderName)
                 //     .then( result => {
                 //         return res.status(201).json({ msg: result });
                 //     })
@@ -84,7 +84,7 @@ class Server {
                 const { folder:folderName } = req.body;
 
                 // invocacion servicio para subir archivo a sharepoint
-                // this.sharepointService.uploadFile(folderName, file, file.name, this.router)
+                // this.sharepointService.uploadFile(folderName, file)
                 //     .then( result => {
                 //         return res.status(201).json({ msg: result });
                 //     })
