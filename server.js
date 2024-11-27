@@ -2,6 +2,7 @@ const express = require('express')
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const cors = require('cors');
+const SharepointService = require('./sharepoint-service');
 
 class Server {
     
@@ -13,6 +14,9 @@ class Server {
         // Middlewares
         this.middelwares();
 
+        // pendiente de implementacion
+        // this.sharepointService = new SharepointService();
+
         // Rutas de la aplicacion
         this.routes();
     }
@@ -20,7 +24,7 @@ class Server {
     middelwares() {
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(express.json());
-        this.app.use('/', this.router);
+        this.app.use('/api', this.router);
         this.app.use(cors());
         this.router.use( (req, res , next) => { next() });
         this.router.use(fileUpload({
@@ -33,15 +37,27 @@ class Server {
     routes() {
         // ENDPOINT -> CREATE FOLDE IN SHAREPOINT
         this.router.get('/create-folder/:name?',  (req = express.request, res = express.response) => {
-
             try {
-                const { name:folderName = undefined } = req.params;
-            
-                if (fs.existsSync(folderName) || !folderName){
-                    const msg = !folderName ?  'No se ha indicado el nombre de la carpeta.' : `La carpeta ${folderName} ya existe.`; 
-                    return res.status(400).json({ msg });
+                if (!req.params.name) {
+                    return res.status(400).json({ msg: 'No se ha indicado el nombre de la carpeta.' });
                 }
-                      
+
+                const { name:folderName } = req.params;
+
+                // invocacion servicio para subir archivo a sharepoint
+                // this.sharepointService.createFolder(folderName, this.router)
+                //     .then( result => {
+                //         return res.status(201).json({ msg: result });
+                //     })
+                //     .catch(err => {
+                //         return res.status(422).json({ msg: err });
+                //     });
+
+                // proceso en servidor
+                if (fs.existsSync(folderName)){
+                    return res.status(400).json({ msg: `La carpeta ${folderName} ya existe.` });
+                }
+                
                 fs.mkdirSync(folderName, { recursive: true })
                 
                 return fs.existsSync(folderName) ? 
@@ -65,10 +81,20 @@ class Server {
                 }
                 
                 const { file } = req.files;
-                const { folder } = req.body;
-                
-                if (fs.existsSync(folder)){
-                    return file.mv(__dirname + '/' + folder + '/' + file.name)? 
+                const { folder:folderName } = req.body;
+
+                // invocacion servicio para subir archivo a sharepoint
+                // this.sharepointService.uploadFile(folderName, file, file.name, this.router)
+                //     .then( result => {
+                //         return res.status(201).json({ msg: result });
+                //     })
+                //     .catch(err => {
+                //         return res.status(422).json({ msg: err });
+                //     });
+
+                // proceso en servidor
+                if (fs.existsSync(folderName)){
+                    return file.mv(__dirname + '/' + folderName + '/' + file.name)? 
                         res.status(201).json({ msg: 'Fichero guardado correctamente.' }): 
                         res.status(400).json({ msg: 'Ha ocurrido un error en el proceso de guardado del fichero.' });
                 } else {
