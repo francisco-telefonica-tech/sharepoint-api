@@ -37,6 +37,7 @@ class Server {
     routes() {
         // ENDPOINT -> CREATE FOLDE IN SHAREPOINT
         this.router.get('/create-folder/:name?',  (req = express.request, res = express.response) => {
+
             try {
                 if (!req.params.name) {
                     return res.status(400).json({ msg: 'No se ha indicado el nombre de la carpeta.' });
