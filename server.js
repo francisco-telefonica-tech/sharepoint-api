@@ -2,7 +2,7 @@ const express = require("express");
 const fileUpload = require("express-fileupload");
 const fs = require("fs");
 const cors = require("cors");
-const SharepointService = require("./sharepoint-service");
+const SharepointService = require("./sp-service");
 
 class Server {
   constructor() {
@@ -15,7 +15,7 @@ class Server {
     this.middelwares();
 
     // pendiente de implementacion
-    // this.sharepointService = new SharepointService();
+    this.sharepointService = new SharepointService();
 
     // Rutas de la aplicacion
     this.routes();
@@ -39,46 +39,35 @@ class Server {
   }
 
   routes() {
-    // ENDPOINT -> CREATE FOLDE IN SHAREPOINT
+    // ENDPOINT -> CREATE FOLDER IN SHAREPOINT
     this.router.get(
-      "/create-folder/:name?",
+      "/create-folder/:folder?",
       (req = express.request, res = express.response) => {
         try {
-          if (!req.params.name) {
+          if (!req.params.folder) {
             return res
               .status(400)
-              .json({ msg: "No se ha indicado el nombre de la carpeta." });
+              .json({ message: "No se ha indicado el nombre de la carpeta." });
           }
 
-          const { name: folderName } = req.params;
+          const { folder } = req.params;
 
-          // invocacion servicio para subir archivo a sharepoint
-          // this.sharepointService.createFolder(folderName)
-          //     .then( result => {
-          //         return res.status(201).json({ msg: result });
-          //     })
-          //     .catch(err => {
-          //         return res.status(422).json({ msg: err });
-          //     });
-
-          // proceso en servidor
-          if (fs.existsSync(folderName)) {
-            return res
-              .status(400)
-              .json({ msg: `La carpeta ${folderName} ya existe.` });
-          }
-
-          fs.mkdirSync(folderName, { recursive: true });
-
-          return fs.existsSync(folderName)
-            ? res.status(201).json({
-                msg: `La carpeta ${folderName} se ha creado correctamente.`,
-              })
-            : res
-                .status(500)
-                .json({ msg: `Ha ocurrido un error en el servidor.` });
-        } catch (error) {
-          res.send({ error: error.code });
+          this.sharepointService
+            .createFolder(folder)
+            .then((result) => {
+              res.status(201).json({
+                message: result,
+              });
+            })
+            .catch((error) => {
+              res.status(400).json({
+                message: error,
+              });
+            });
+        } catch ({ message }) {
+          res.status(400).json({
+            message,
+          });
         }
       }
     );
@@ -91,41 +80,34 @@ class Server {
           if (!req.files || !req.files.file) {
             return res
               .status(422)
-              .json({ msg: "No se ha seleccionado ningún fichero." });
+              .json({ message: "No se ha seleccionado ningún fichero." });
           }
 
           if (!req.body.folder) {
             return res
               .status(422)
-              .json({ msg: "No se ha indicado la carpeta." });
+              .json({ message: "No se ha indicado la carpeta." });
           }
 
           const { file } = req.files;
-          const { folder: folderName } = req.body;
+          const { folder } = req.body;
 
-          // invocacion servicio para subir archivo a sharepoint
-          // this.sharepointService.uploadFile(folderName, file)
-          //     .then( result => {
-          //         return res.status(201).json({ msg: result });
-          //     })
-          //     .catch(err => {
-          //         return res.status(422).json({ msg: err });
-          //     });
-
-          // proceso en servidor
-          if (fs.existsSync(folderName)) {
-            return file.mv(__dirname + "/" + folderName + "/" + file.name)
-              ? res.status(201).json({ msg: "Fichero guardado correctamente." })
-              : res.status(400).json({
-                  msg: "Ha ocurrido un error en el proceso de guardado del fichero.",
-                });
-          } else {
-            return res
-              .status(400)
-              .json({ msg: "No existe la carpeta indicada." });
-          }
-        } catch (error) {
-          res.send({ error: error.code });
+          this.sharepointService
+            .uploadFile(folder, file)
+            .then((result) => {
+              res.status(201).json({
+                message: result,
+              });
+            })
+            .catch((error) => {
+              res.status(400).json({
+                message: error,
+              });
+            });
+        } catch ({ message }) {
+          res.status(400).json({
+            message,
+          });
         }
       }
     );
