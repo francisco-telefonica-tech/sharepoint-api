@@ -24,8 +24,8 @@ class SPService {
         .catch((error) => {
           return error;
         });
-    } catch ({ message }) {
-      return message;
+    } catch (error) {
+      return error;
     }
   }
 
@@ -45,8 +45,8 @@ class SPService {
         .catch((error) => {
           return error;
         });
-    } catch ({ message }) {
-      return message;
+    } catch (error) {
+      return error;
     }
   }
 }
