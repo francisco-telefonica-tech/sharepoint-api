@@ -31,8 +31,8 @@ class Server {
 
     spauth
       .getAuth(url, {
-        username: "francisco.jimenezmartin@telefonica.com",
-        password: "@Eagletos21",
+        username: "",
+        password: "",
         online: true,
       })
       .catch((error) => {
