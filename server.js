@@ -4,6 +4,11 @@ const fs = require("fs");
 const cors = require("cors");
 // const SharepointService = require("./sp-service");
 
+const spauth = require("node-sp-auth");
+const request = require("request-promise");
+const $REST = require("gd-sprest");
+const { error } = require("console");
+
 class Server {
   constructor() {
     this.app = express();
@@ -19,11 +24,25 @@ class Server {
 
     // Rutas de la aplicacion
     this.routes();
+
+    //telefonicacorp-my.sharepoint.com/my?id=/personal/francisco_jimenezmartin_telefonica_com/Documents/prueba&login_hint=francisco.jimenezmartin@telefonica.com
+
+    const url = "https://telefonicacorp-my.sharepoint.com";
+
+    spauth
+      .getAuth(url, {
+        username: "francisco.jimenezmartin@telefonica.com",
+        password: "@Eagletos21",
+        online: true,
+      })
+      .catch((error) => {
+        console.log("ERROR GET OUT...", error.message, "JEJEJEJEJ");
+      });
   }
 
   middelwares() {
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(express.send());
+
     this.app.use("/api", this.router);
     this.app.use(cors());
     this.router.use((req, res, next) => {
@@ -47,9 +66,9 @@ class Server {
           if (!req.params.folder) {
             return res
               .status(400)
-              .send({ error: "No se ha indicado el nombre de la carpeta." });
+              .json({ error: "No se ha indicado el nombre de la carpeta." });
           }
-          res.status(400).send({
+          res.status(400).json({
             error: "Falta implementacion crear carpeta.",
           });
 
@@ -58,17 +77,17 @@ class Server {
           // this.sharepointService
           //   .createFolder(folder)
           //   .then((result) => {
-          //     res.status(201).send({
+          //     res.status(201).json({
           //       message: result,
           //     });
           //   })
           //   .catch((error) => {
-          //     res.status(400).send({
+          //     res.status(400).json({
           //       error: error,
           //     });
           //   });
         } catch (error) {
-          res.status(400).send({
+          res.status(400).json({
             error: error.message,
           });
         }
@@ -83,16 +102,16 @@ class Server {
           if (!req.files || !req.files.file) {
             return res
               .status(422)
-              .send({ error: "No se ha seleccionado ningún fichero." });
+              .json({ error: "No se ha seleccionado ningún fichero." });
           }
 
           if (!req.body.folder) {
             return res
               .status(422)
-              .send({ error: "No se ha indicado la carpeta." });
+              .json({ error: "No se ha indicado la carpeta." });
           }
 
-          res.status(400).send({
+          res.status(400).json({
             error: "Falta implementacion carga de fichero.",
           });
 
@@ -102,17 +121,17 @@ class Server {
           // this.sharepointService
           //   .uploadFile(folder, file)
           //   .then((result) => {
-          //     res.status(201).send({
+          //     res.status(201).json({
           //       message: result,
           //     });
           //   })
           //   .catch((error) => {
-          //     res.status(400).send({
+          //     res.status(400).json({
           //       message: error,
           //     });
           //   });
         } catch (error) {
-          res.status(400).send({
+          res.status(400).json({
             error: error.message,
           });
         }

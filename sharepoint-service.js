@@ -1,14 +1,5 @@
 // https://telefonicacorp-my.sharepoint.com/my?id=/personal/francisco_jimenezmartin_telefonica_com/Documents/prueba&login_hint=francisco.jimenezmartin@telefonica.com
 
-// invocacion servicio para subir archivo a sharepoint
-// this.sharepointService.createFolder(folderName)
-//     .then( result => {
-//         return res.status(201).json({ message: result });
-//     })
-//     .catch(err => {
-//         return res.status(422).json({ message: err });
-//     });
-
 class SharepointService {
   constructor() {
     // this.client = new aws.SecretsManager();
